@@ -5,7 +5,7 @@ import (
 	"appengine/datastore"
 	"appengine/user"
 	"fmt"
-    "html/template"
+	"html/template"
 	"net/http"
 	"types"
 )
@@ -37,10 +37,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusTemporaryRedirect)
 	} else if len(tokens) == 1 {
 		// Display the pretty map using the token.
-        token := tokens[0].OAuthToken
-        tmpl.Execute(w, map[string]string{
-            "OAuthToken": token,
-        })
+		token := tokens[0].OAuthToken
+		tmpl.Execute(w, map[string]string{
+			"OAuthToken": token,
+		})
 	} else {
 		err := fmt.Sprintf("Unexpected number of tokens for %v", u)
 		http.Error(w, err, http.StatusInternalServerError)

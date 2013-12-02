@@ -1,8 +1,8 @@
 package connect_to_foursquare
 
 import (
-	"net/http"
 	"html/template"
+	"net/http"
 )
 
 func init() {
@@ -14,5 +14,5 @@ var tmpl = template.Must(template.ParseFiles(
 	"connect_to_foursquare/templates/connect_to_foursquare.html"))
 
 func handler(w http.ResponseWriter, r *http.Request) {
-    tmpl.Execute(w, "")
+	tmpl.Execute(w, "")
 }
