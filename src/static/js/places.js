@@ -1,5 +1,4 @@
 var places = {
-    OAUTH_TOKEN: "4J3MWVUK1POMGLPE2CUMSXRJNFFKMI03K1VUEGAWXO4AYIBO",
     FOURSQUARE_API_VERSION: "20131201",
 
     all_info_windows: [],
@@ -61,6 +60,7 @@ $(function() {
     var map = InitializeMap();
 
     // Get Foursquare todo list metadata.
+    // TODO: Handle 401 Unauthorized.
     $.ajax({
         url: "https://api.foursquare.com/v2/users/self/lists",
         data: {
