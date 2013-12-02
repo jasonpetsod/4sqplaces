@@ -6,7 +6,9 @@ api_version: go1
 handlers:
 - url: /static
   static_dir: static
-- url: /.*
+# TODO: Make this suck less. login=required for /.* doesn't play nicely with
+# logins.
+- url: /(connect_to_foursquare|foursquare_access_token)?
   script: _go_app
   login: required
   secure: always
