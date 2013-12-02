@@ -17,18 +17,15 @@ function RenderListItems(map, items) {
     var list_id;
     $.each(items, function (i, v) {
         if (v.name == "My to-do list") {
-            console.log(v);
             num_list_items = v.listItems.count;
             list_id = v.id;
         }
     });
-    console.log(num_list_items, list_id);
 
-    var list_items = [];
+    var all_info_windows = [];
     if (num_list_items > 0) {
         // Fetch items.
         for (var i = 0; i < num_list_items / 100; i++) {
-            console.log('fetching');
             $.ajax({
                 url: "https://api.foursquare.com/v2/lists/" + list_id,
                 data: {
@@ -37,9 +34,24 @@ function RenderListItems(map, items) {
                     offset: i * 100
                 },
                 success: function (data, status, xhr) {
-                    console.log(data);
                     $.each(data.response.list.listItems.items, function (i, v) {
-                        console.log(v.venue.name);
+                        var venue = v.venue;
+                        var marker = new google.maps.Marker({
+                            position: new google.maps.LatLng(
+                                    venue.location.lat, venue.location.lng),
+                            map: map,
+                            title: venue.name
+                        });
+                        var info_window = new google.maps.InfoWindow({
+                            content: "<b>" + venue.name + "</b><br />" + venue.location.address,
+                        });
+                        all_info_windows.push(info_window);
+                        google.maps.event.addListener(marker, 'click', function() {
+                            $.each(all_info_windows, function (i, v) {
+                                v.close();
+                            });
+                            info_window.open(map, marker);
+                        });
                     });
                 },
             });
