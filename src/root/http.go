@@ -6,11 +6,8 @@ import (
 	"appengine/user"
 	"fmt"
 	"net/http"
+	"types"
 )
-
-type FoursquareAuthToken struct {
-	OAuthToken string
-}
 
 func init() {
 	http.HandleFunc("/", handler)
@@ -19,21 +16,23 @@ func init() {
 func handler(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 	u := user.Current(c)
-	oauth_token_key := datastore.NewKey(c, "FoursquareAuthToken",
+	oauth_token_key := datastore.NewKey(c, "types.FoursquareAuthToken",
 		u.ID, 0, nil)
-	q := datastore.NewQuery("FoursquareAuthToken").Filter(
+	q := datastore.NewQuery("types.FoursquareAuthToken").Filter(
 		"__key__ =", oauth_token_key)
-	var tokens []FoursquareAuthToken
+	var tokens []types.FoursquareAuthToken
 	_, err := q.GetAll(c, &tokens)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	// TODO: Use switch statement here.
 	if len(tokens) == 0 {
-		// Prompt user to generate a token.
+		w.Header().Set("Location", "/connect_to_foursquare")
+		w.WriteHeader(http.StatusTemporaryRedirect)
 	} else if len(tokens) == 1 {
 		// Display the pretty map using the token.
-		fmt.Fprintf(w, "hello %v", u)
+		fmt.Fprintf(w, "hello %v, your token is %v", u, tokens[0].OAuthToken)
 	} else {
 		err := fmt.Sprintf("Unexpected number of tokens for %v", u)
 		http.Error(w, err, http.StatusInternalServerError)
