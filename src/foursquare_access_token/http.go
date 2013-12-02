@@ -1,4 +1,4 @@
-package root
+package foursquare_access_token
 
 import (
 	"appengine"
@@ -26,6 +26,7 @@ func foursquareClientSecret(c appengine.Context) string {
 		var secrets []types.FoursquareClientSecret
 		_, err := q.GetAll(c, &secrets)
 		if err != nil {
+            // TODO: Do something smarter here.
 			return ""
 		}
 
