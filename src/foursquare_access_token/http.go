@@ -27,6 +27,7 @@ func foursquareClientSecret(c appengine.Context) string {
 		_, err := q.GetAll(c, &secrets)
 		if err != nil {
 			// TODO: Do something smarter here.
+			c.Errorf("Could not get client secret")
 			return ""
 		}
 
@@ -81,7 +82,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		u := user.Current(c)
 
 		token := types.FoursquareAuthToken{
+			// TODO: Sanitize this so Foursquare can't inject anything into
+			// our app.
 			OAuthToken: access_token.(string),
+			Email:      u.Email,
 		}
 
 		key := datastore.NewKey(c, "types.FoursquareAuthToken", u.ID, 0, nil)
