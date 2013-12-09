@@ -1,8 +1,8 @@
-var places = {
-    FOURSQUARE_API_VERSION: "20131201",
+var places = {}
 
-    all_info_windows: [],
-};
+places.FOURSQUARE_API_VERSION = "20131201";
+places.all_info_windows = [];
+places.markers = [];
 
 function InitializeMap() {
     var options = {
@@ -15,7 +15,6 @@ function InitializeMap() {
 
 function DisplayListItems(map, items) {
     $.each(items, function (i, v) {
-        console.log(i);
         var venue = v.venue;
         var marker = new google.maps.Marker({
             position: new google.maps.LatLng(
@@ -23,6 +22,7 @@ function DisplayListItems(map, items) {
             map: map,
             title: venue.name
         });
+        places.markers.push(marker);
         var info_window = new google.maps.InfoWindow({
             content: "<b><a href=\"https://foursquare.com/v/" + venue.id + "\">"
                 + venue.name + "</a></b><br />" + venue.location.address,
@@ -38,8 +38,11 @@ function DisplayListItems(map, items) {
 }
 
 function GetListItems(map, list_id, num_list_items) {
+    // TODO: Query for the number of list items instead of getting it from the
+    // /users/ endpoint which may be stale.
+    // TODO: Cache the result of this request so we don't hit Foursquare every
+    // time the dropdown changes.
     for (var i = 0; i < num_list_items / 100; i++) {
-        console.log('fetching');
         $.ajax({
             url: "https://api.foursquare.com/v2/lists/" + list_id,
             data: {
@@ -57,7 +60,7 @@ function GetListItems(map, list_id, num_list_items) {
 
 $(function() {
     // Create map.
-    var map = InitializeMap();
+    places.map = InitializeMap();
 
     // Get Foursquare todo list metadata.
     // TODO: Handle 401 Unauthorized.
@@ -71,10 +74,38 @@ $(function() {
         success: function (data, status, xhr) {
             var list_id;
             $.each(data.response.lists.items, function (i, v) {
-                if (v.name == "My to-do list") {
-                    GetListItems(map, v.id, v.listItems.count);
-                }
+                var option = $("<option>");
+                option.html(v.name);
+                option.data("list_id", v.id);
+                option.data("num_list_items", v.listItems.count);
+                $("#lists").append(option);
             });
+            $("#lists").change();
         },
+    });
+
+    $("#lists").change(function() {
+        // Close and destroy any info windows.
+        $.each(places.all_info_windows, function (_, v) {
+            v.close();
+        });
+        places.all_info_windows.length = 0;
+
+        // Clear all existing map items.
+        $.each(places.markers, function (_, v) {
+            v.setMap(null);
+        });
+        places.markers.length = 0;
+
+        // Render new items.
+        var selected = $("#lists option:selected");
+        if (selected.length != 1) {
+            console.log("more than one list selected; bailing", selected);
+            // TODO: Do something nicer.
+            return;
+        }
+        var list_id = selected.data("list_id");
+        var num_list_items = selected.data("num_list_items");
+        GetListItems(places.map, list_id, num_list_items);
     });
 });
