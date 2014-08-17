@@ -94,10 +94,10 @@ function DisplayListItems(map, items) {
         google.maps.event.addListener(marker, 'click', function() {
             var item = marker.venue.list_item;
 
-            var current_scroll_location = $('#controls').scrollTop();
+            var current_scroll_location = $('#venues-list').scrollTop();
             var item_position = item.position().top;
             var new_scroll_position = current_scroll_location + item_position;
-            $('#controls').scrollTop(new_scroll_position);
+            $('#venues-list').scrollTop(new_scroll_position);
 
             $('#venues-list li').removeClass('selected');
             $(item).addClass('selected');
