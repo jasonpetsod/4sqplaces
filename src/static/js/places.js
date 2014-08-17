@@ -66,10 +66,11 @@ function GetListItems(map, list_id, num_list_items, options) {
     // /users/ endpoint which may be stale.
     // TODO: Cache the result of this request so we don't hit Foursquare every
     // time the dropdown changes.
+    // TODO: Stop hardcoding the offset of 100.
+    // TODO: Don't paginate if there are fewer than 100 items in the results.
     for (var i = 0; i < num_list_items / 100; i++) {
         var data = jQuery.extend({}, query);
         data['offset'] = i * 100;
-        console.log(data);
         $.ajax({
             url: "https://api.foursquare.com/v2/lists/" + list_id,
             data: data,
