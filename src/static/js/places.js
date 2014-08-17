@@ -122,7 +122,8 @@ function GetListItems(map, list_id, num_list_items, options) {
     var query = {
         oauth_token: places.OAUTH_TOKEN,
         v: places.FOURSQUARE_API_VERSION,
-        limit: 100
+        limit: 100,
+        sort: 'nearby'
     };
     if ('bounds' in options) {
         query['llBounds'] = options.bounds.toUrlValue();
