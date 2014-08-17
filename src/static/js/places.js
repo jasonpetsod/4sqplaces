@@ -144,6 +144,7 @@ function RenderMap() {
         v.marker = null;
     });
     places.displayed_venues = {};
+    $('#venues-list ul').html('');
 
     // Render new items.
     var selected = $("#lists option:selected");
