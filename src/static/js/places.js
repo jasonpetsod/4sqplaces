@@ -138,7 +138,7 @@ function GetListItems(map, list_id, num_list_items, options) {
     // time the dropdown changes.
     // TODO: Stop hardcoding the offset of 100.
     // TODO: Don't paginate if there are fewer than 100 items in the results.
-    var num_queries = Math.floor(num_list_items / 100);
+    var num_queries = Math.ceil(num_list_items / 100);
     places.pending_queries = num_queries;
     for (var i = 0; i < num_queries; i++) {
         var data = jQuery.extend({}, query);
@@ -175,6 +175,7 @@ function RenderingAllowed() {
  */
 function RenderMap() {
     if (!RenderingAllowed()) {
+        console.log('rendering not allowed');
         return;
     }
 
@@ -228,6 +229,7 @@ $(function() {
     });
 
     $("#lists").change(function() {
+        console.log('changed!');
         RenderMap();
     });
 });
