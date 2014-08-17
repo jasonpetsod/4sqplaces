@@ -46,6 +46,7 @@ function DisplayListItems(map, items) {
             map: map,
             title: venue.name
         });
+        marker.venue = venue;
         venue.marker = marker;
 
         // Add element to list.
@@ -53,6 +54,16 @@ function DisplayListItems(map, items) {
         item.html(foursquare_venue.name);
         item.data('id', foursquare_venue.id);
         $('#venues-list ul').append(item);
+        venue.list_item = item;
+
+        google.maps.event.addListener(marker, 'click', function() {
+            var item = marker.venue.list_item;
+
+            var current_scroll_location = $('#controls').scrollTop();
+            var item_position = item.position().top;
+            var new_scroll_position = current_scroll_location + item_position;
+            $('#controls').scrollTop(new_scroll_position);
+        });
     });
 }
 
