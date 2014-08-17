@@ -37,20 +37,42 @@ function DisplayListItems(map, items) {
     });
 }
 
-function GetListItems(map, list_id, num_list_items) {
+/**
+ * Retrieve list items and then render them on the map.
+ *
+ * @param {google.maps.Map} map
+ * @param {number} list_id The ID of the list to fetch.
+ * @param {number} num_list_items The number of items in the list to fetch.
+ * Used for query paging.
+ * @param {object} options Options for the query.
+ * @param {google.maps.LatLng} [options.bounds] Only retrieve list items
+ * within these geographical coordinates.
+ */
+function GetListItems(map, list_id, num_list_items, options) {
+    if (options === undefined) {
+        options = {};
+    }
+
+    var query = {
+        oauth_token: places.OAUTH_TOKEN,
+        v: places.FOURSQUARE_API_VERSION,
+        limit: 100
+    };
+    if ('bounds' in options) {
+        query['llBounds'] = options.bounds.toUrlValue();
+    }
+
     // TODO: Query for the number of list items instead of getting it from the
     // /users/ endpoint which may be stale.
     // TODO: Cache the result of this request so we don't hit Foursquare every
     // time the dropdown changes.
     for (var i = 0; i < num_list_items / 100; i++) {
+        var data = jQuery.extend({}, query);
+        data['offset'] = i * 100;
+        console.log(data);
         $.ajax({
             url: "https://api.foursquare.com/v2/lists/" + list_id,
-            data: {
-                oauth_token: places.OAUTH_TOKEN,
-                v: places.FOURSQUARE_API_VERSION,
-                limit: 100,
-                offset: i * 100
-            },
+            data: data,
             success: function (data, status, xhr) {
                 DisplayListItems(map, data.response.list.listItems.items);
             },
@@ -106,6 +128,9 @@ $(function() {
         }
         var list_id = selected.data("list_id");
         var num_list_items = selected.data("num_list_items");
-        GetListItems(places.map, list_id, num_list_items);
+        var options = {
+            bounds: places.map.getBounds()
+        };
+        GetListItems(places.map, list_id, num_list_items, options);
     });
 });
