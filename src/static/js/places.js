@@ -81,6 +81,37 @@ function GetListItems(map, list_id, num_list_items, options) {
     }
 }
 
+/**
+ * Fetch list items and render them on the map.
+ */
+function RenderMap() {
+    // Close and destroy any info windows.
+    $.each(places.all_info_windows, function (_, v) {
+        v.close();
+    });
+    places.all_info_windows.length = 0;
+
+    // Clear all existing map items.
+    $.each(places.markers, function (_, v) {
+        v.setMap(null);
+    });
+    places.markers.length = 0;
+
+    // Render new items.
+    var selected = $("#lists option:selected");
+    if (selected.length != 1) {
+        console.log("more than one list selected; bailing", selected);
+        // TODO: Do something nicer.
+        return;
+    }
+    var list_id = selected.data("list_id");
+    var num_list_items = selected.data("num_list_items");
+    var options = {
+        bounds: places.map.getBounds()
+    };
+    GetListItems(places.map, list_id, num_list_items, options);
+}
+
 $(function() {
     // Create map.
     places.map = InitializeMap();
@@ -103,35 +134,11 @@ $(function() {
                 option.data("num_list_items", v.listItems.count);
                 $("#lists").append(option);
             });
-            $("#lists").change();
+            RenderMap();
         },
     });
 
     $("#lists").change(function() {
-        // Close and destroy any info windows.
-        $.each(places.all_info_windows, function (_, v) {
-            v.close();
-        });
-        places.all_info_windows.length = 0;
-
-        // Clear all existing map items.
-        $.each(places.markers, function (_, v) {
-            v.setMap(null);
-        });
-        places.markers.length = 0;
-
-        // Render new items.
-        var selected = $("#lists option:selected");
-        if (selected.length != 1) {
-            console.log("more than one list selected; bailing", selected);
-            // TODO: Do something nicer.
-            return;
-        }
-        var list_id = selected.data("list_id");
-        var num_list_items = selected.data("num_list_items");
-        var options = {
-            bounds: places.map.getBounds()
-        };
-        GetListItems(places.map, list_id, num_list_items, options);
+        RenderMap();
     });
 });
