@@ -1,10 +1,13 @@
 var places = {}
 
 places.FOURSQUARE_API_VERSION = "20131201";
-places.all_info_windows = [];
-places.markers = [];
+places.displayed_venues = {};
 places.pending_queries = 0;
 places.drag_in_progress = false;
+
+function Venue(foursquare_venue) {
+    this.foursquare_venue = foursquare_venue;
+}
 
 function InitializeMap() {
     var options = {
@@ -31,25 +34,31 @@ function InitializeMap() {
 
 function DisplayListItems(map, items) {
     $.each(items, function (i, v) {
-        var venue = v.venue;
+        var foursquare_venue = v.venue;
+        var venue = new Venue(foursquare_venue);
+        places.displayed_venues[venue.foursquare_venue.id] = venue;
+
         var marker = new google.maps.Marker({
             position: new google.maps.LatLng(
-                    venue.location.lat, venue.location.lng),
+                    foursquare_venue.location.lat,
+                    foursquare_venue.location.lng),
             map: map,
             title: venue.name
         });
-        places.markers.push(marker);
+        venue.marker = marker;
+
         var info_window = new google.maps.InfoWindow({
-            content: "<b><a href=\"https://foursquare.com/v/" + venue.id + "\">"
-                + venue.name + "</a></b><br />" + venue.location.address,
+            content: "<b><a href=\"https://foursquare.com/v/"
+                + foursquare_venue.id + "\">" + foursquare_venue.name
+                + "</a></b><br />" + foursquare_venue.location.address
         });
-        places.all_info_windows.push(info_window);
         google.maps.event.addListener(marker, 'click', function() {
-            $.each(places.all_info_windows, function (i, v) {
-                v.close();
+            $.each(places.displayed_venues, function (_, v) {
+                v.info_window.close();
             });
             info_window.open(map, marker);
         });
+        venue.info_window = info_window;
     });
 }
 
@@ -124,17 +133,14 @@ function RenderMap() {
         return;
     }
 
-    // Close and destroy any info windows.
-    $.each(places.all_info_windows, function (_, v) {
-        v.close();
+    // Destroy all info windows and markers.
+    $.each(places.displayed_venues, function (_, v) {
+        v.info_window.close();
+        v.info_window = null;
+        v.marker.setMap(null);
+        v.marker = null;
     });
-    places.all_info_windows.length = 0;
-
-    // Clear all existing map items.
-    $.each(places.markers, function (_, v) {
-        v.setMap(null);
-    });
-    places.markers.length = 0;
+    places.displayed_venues = {};
 
     // Render new items.
     var selected = $("#lists option:selected");
