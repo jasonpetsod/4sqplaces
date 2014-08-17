@@ -63,6 +63,13 @@ function MakeListItem(venue) {
 function DisplayListItems(map, items) {
     $.each(items, function (i, v) {
         var foursquare_venue = v.venue;
+
+        if ('closed' in foursquare_venue) {
+            if (foursquare_venue.closed) {
+                return;
+            }
+        }
+
         var venue = new Venue(foursquare_venue);
         places.displayed_venues[venue.foursquare_venue.id] = venue;
 
