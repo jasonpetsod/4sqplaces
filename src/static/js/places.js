@@ -12,7 +12,9 @@ function Venue(foursquare_venue) {
 function InitializeMap() {
     var options = {
         center: new google.maps.LatLng(40.730885,-73.997383),
-        zoom: 15
+        zoom: 15,
+        mapTypeControl: false,
+        panControl: false
     };
     var map = new google.maps.Map($("#map-canvas").get(0), options);
 
@@ -99,6 +101,7 @@ function DisplayListItems(map, items) {
 
             $('#venues-list li').removeClass('selected');
             $(item).addClass('selected');
+            console.log(venue.foursquare_venue);
         });
     });
 }
