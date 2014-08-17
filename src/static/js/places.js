@@ -38,6 +38,7 @@ function DisplayListItems(map, items) {
         var venue = new Venue(foursquare_venue);
         places.displayed_venues[venue.foursquare_venue.id] = venue;
 
+        // Add marker.
         var marker = new google.maps.Marker({
             position: new google.maps.LatLng(
                     foursquare_venue.location.lat,
@@ -47,6 +48,7 @@ function DisplayListItems(map, items) {
         });
         venue.marker = marker;
 
+        // Add info window.
         var info_window = new google.maps.InfoWindow({
             content: "<b><a href=\"https://foursquare.com/v/"
                 + foursquare_venue.id + "\">" + foursquare_venue.name
@@ -59,6 +61,12 @@ function DisplayListItems(map, items) {
             info_window.open(map, marker);
         });
         venue.info_window = info_window;
+
+        // Add element to list.
+        var item = $('<li>');
+        item.html(foursquare_venue.name);
+        item.data('id', foursquare_venue.id);
+        $('#venues-list ul').append(item);
     });
 }
 
