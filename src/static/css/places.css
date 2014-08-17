@@ -12,13 +12,13 @@ body {
 
 #map-canvas {
     height: 100%;
-    width: 50%;
+    width: 65%;
     float: left;
 }
 
 #controls {
     height: 100%;
-    width: 50%;
+    width: 35%;
     float: left;
     overflow: scroll;
 }
