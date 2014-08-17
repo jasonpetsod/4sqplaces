@@ -1,5 +1,7 @@
 html {
     height: 100%;
+    font-family: "Helvetica", "Arial", sans-serif;
+    font-size: 10pt;
 }
 
 body {
@@ -29,7 +31,17 @@ body {
 
 #venues-list li {
     display: block;
-    border: 1px solid #000;
+    padding: 1em;
+    margin: 0;
+    border-bottom: 1px solid #eee;
+}
+
+#venues-list li.selected {
+    background-color: #ddd;
+}
+
+#venues-list h1 {
+    font-size: 10pt;
+    margin: 0;
     padding: 0;
-    margin: 0 0 1em 0;
 }

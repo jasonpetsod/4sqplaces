@@ -32,6 +32,34 @@ function InitializeMap() {
     return map;
 }
 
+function MakeListItem(venue) {
+    var item = $('<li>');
+    var title = $('<h1>').html(venue.foursquare_venue.name);
+    var address = $('<div>').addClass('address').html(
+        venue.foursquare_venue.location.address);
+
+    if (venue.foursquare_venue.location.crossStreet !== undefined) {
+        address.append(' (' + venue.foursquare_venue.location.crossStreet + ')');
+    }
+
+    var category_name = undefined;
+    $.each(venue.foursquare_venue.categories, function (_, v) {
+        if (v.primary) {
+            category_name = v.name;
+            return;
+        }
+    });
+
+    item.append(title);
+    item.append(address);
+    if (category_name !== undefined) {
+        var category = $('<div>').addClass('category').html(category_name);
+        item.append(category);
+    }
+    item.data('id', venue.foursquare_venue.id);
+    return item;
+}
+
 function DisplayListItems(map, items) {
     $.each(items, function (i, v) {
         var foursquare_venue = v.venue;
@@ -50,9 +78,7 @@ function DisplayListItems(map, items) {
         venue.marker = marker;
 
         // Add element to list.
-        var item = $('<li>');
-        item.html(foursquare_venue.name);
-        item.data('id', foursquare_venue.id);
+        var item = MakeListItem(venue);
         $('#venues-list ul').append(item);
         venue.list_item = item;
 
@@ -63,6 +89,9 @@ function DisplayListItems(map, items) {
             var item_position = item.position().top;
             var new_scroll_position = current_scroll_location + item_position;
             $('#controls').scrollTop(new_scroll_position);
+
+            $('#venues-list li').removeClass('selected');
+            $(item).addClass('selected');
         });
     });
 }
