@@ -3,6 +3,8 @@ var places = {}
 places.FOURSQUARE_API_VERSION = "20131201";
 places.all_info_windows = [];
 places.markers = [];
+places.pending_queries = 0;
+places.drag_in_progress = false;
 
 function InitializeMap() {
     var options = {
@@ -10,6 +12,20 @@ function InitializeMap() {
         zoom: 15
     };
     var map = new google.maps.Map($("#map-canvas").get(0), options);
+
+    google.maps.event.addListener(map, 'dragstart', function() {
+        places.drag_in_progress = true;
+    });
+    google.maps.event.addListener(map, 'dragend', function() {
+        places.drag_in_progress = false;
+        RenderMap();
+    });
+    google.maps.event.addListener(map, 'bounds_changed', function() {
+        if (places.drag_in_progress) {
+            return;
+        }
+        RenderMap();
+    });
     return map;
 }
 
@@ -68,7 +84,9 @@ function GetListItems(map, list_id, num_list_items, options) {
     // time the dropdown changes.
     // TODO: Stop hardcoding the offset of 100.
     // TODO: Don't paginate if there are fewer than 100 items in the results.
-    for (var i = 0; i < num_list_items / 100; i++) {
+    var num_queries = Math.floor(num_list_items / 100);
+    places.pending_queries = num_queries;
+    for (var i = 0; i < num_queries; i++) {
         var data = jQuery.extend({}, query);
         data['offset'] = i * 100;
         $.ajax({
@@ -76,15 +94,36 @@ function GetListItems(map, list_id, num_list_items, options) {
             data: data,
             success: function (data, status, xhr) {
                 DisplayListItems(map, data.response.list.listItems.items);
+                MaybeFinishRendering();
+            },
+            error: function (xhr, status, error) {
+                MaybeFinishRendering();
             },
         });
     }
+}
+
+function MaybeFinishRendering() {
+    if (places.pending_queries < 0) {
+        console.log('pending renders < 0! bailing.');
+        return;
+    }
+
+    places.pending_queries--;
+}
+
+function RenderingAllowed() {
+    return places.pending_queries == 0;
 }
 
 /**
  * Fetch list items and render them on the map.
  */
 function RenderMap() {
+    if (!RenderingAllowed()) {
+        return;
+    }
+
     // Close and destroy any info windows.
     $.each(places.all_info_windows, function (_, v) {
         v.close();
