@@ -48,20 +48,6 @@ function DisplayListItems(map, items) {
         });
         venue.marker = marker;
 
-        // Add info window.
-        var info_window = new google.maps.InfoWindow({
-            content: "<b><a href=\"https://foursquare.com/v/"
-                + foursquare_venue.id + "\">" + foursquare_venue.name
-                + "</a></b><br />" + foursquare_venue.location.address
-        });
-        google.maps.event.addListener(marker, 'click', function() {
-            $.each(places.displayed_venues, function (_, v) {
-                v.info_window.close();
-            });
-            info_window.open(map, marker);
-        });
-        venue.info_window = info_window;
-
         // Add element to list.
         var item = $('<li>');
         item.html(foursquare_venue.name);
@@ -143,8 +129,6 @@ function RenderMap() {
 
     // Destroy all info windows and markers.
     $.each(places.displayed_venues, function (_, v) {
-        v.info_window.close();
-        v.info_window = null;
         v.marker.setMap(null);
         v.marker = null;
     });
