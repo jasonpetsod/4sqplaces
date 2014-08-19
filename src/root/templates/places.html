@@ -1,22 +1,32 @@
 {{define "head"}}
 <link rel="stylesheet" href="/static/css/places.css" />
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBkaFywaF2xqKiowMc-5DWVOdEFJzREygU&sensor=false"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+<script src="/static/js/angular.js"></script>
 <script src="/static/js/places.js"></script>
 <script>
 places.OAUTH_TOKEN = "{{.OAuthToken}}";
 </script>
 {{end}}
 {{define "content"}}
-<div id="map-canvas">
-</div>
-<div id="sidebar">
+<div id="map-canvas"></div>
+
+<div ng-app="places_app">
+<div id="sidebar" ng-controller="PlacesController">
+
 <div id="controls">
-<select id="lists" name="list"> </select>
-</div>
+<select ng-model="active_list"
+        ng-options="list.name for list in lists"
+        ng-change="updateMap()"></select>
+</div> <!-- #controls -->
 
 <div id="venues-list">
-<ul></ul>
-</div>
-</div>
+<li ng-repeat="venue in venues">
+<h1>[[venue.name]]</h1>
+<div>[[venue.location.address]] ([[venue.location.crossStreet]])</div>
+<div>[[venue._places_primary_category.name]]</div>
+</li>
+</div> <!-- #venues-list -->
+
+</div> <!-- #sidebar -->
+
+</div> <!-- ng-app="places" -->
 {{end}}
