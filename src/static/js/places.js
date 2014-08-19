@@ -5,10 +5,6 @@ places.displayed_venues = {};
 places.pending_queries = 0;
 places.drag_in_progress = false;
 
-function Venue(foursquare_venue) {
-    this.foursquare_venue = foursquare_venue;
-}
-
 function InitializeMap() {
     var options = {
         center: new google.maps.LatLng(40.730885,-73.997383),
@@ -16,50 +12,22 @@ function InitializeMap() {
         mapTypeControl: false,
         panControl: false
     };
-    var map = new google.maps.Map($("#map-canvas").get(0), options);
+    var map = new google.maps.Map(document.getElementById('map-canvas'), options);
 
     google.maps.event.addListener(map, 'dragstart', function() {
         places.drag_in_progress = true;
     });
     google.maps.event.addListener(map, 'dragend', function() {
         places.drag_in_progress = false;
-        RenderMap();
+        //RenderMap();
     });
     google.maps.event.addListener(map, 'bounds_changed', function() {
         if (places.drag_in_progress) {
             return;
         }
-        RenderMap();
+        //RenderMap();
     });
     return map;
-}
-
-function MakeListItem(venue) {
-    var item = $('<li>');
-    var title = $('<h1>').html(venue.foursquare_venue.name);
-    var address = $('<div>').addClass('address').html(
-        venue.foursquare_venue.location.address);
-
-    if (venue.foursquare_venue.location.crossStreet !== undefined) {
-        address.append(' (' + venue.foursquare_venue.location.crossStreet + ')');
-    }
-
-    var category_name = undefined;
-    $.each(venue.foursquare_venue.categories, function (_, v) {
-        if (v.primary) {
-            category_name = v.name;
-            return;
-        }
-    });
-
-    item.append(title);
-    item.append(address);
-    if (category_name !== undefined) {
-        var category = $('<div>').addClass('category').html(category_name);
-        item.append(category);
-    }
-    item.data('id', venue.foursquare_venue.id);
-    return item;
 }
 
 function DisplayListItems(map, items) {
@@ -201,33 +169,72 @@ function RenderMap() {
     GetListItems(places.map, list_id, num_list_items, options);
 }
 
-$(function() {
-    // Create map.
-    places.map = InitializeMap();
+var places_app = angular.module(
+        'places_app',
+        [],
+        function ($interpolateProvider) {
+            $interpolateProvider.startSymbol('[[');
+            $interpolateProvider.endSymbol(']]');
+        }
+);
 
-    // Get Foursquare todo list metadata.
-    // TODO: Handle 401 Unauthorized.
-    $.ajax({
-        url: "https://api.foursquare.com/v2/users/self/lists",
-        data: {
+places_app.controller('PlacesController', function ($scope, $http) {
+    $http({
+        method: 'GET',
+        url: 'https://api.foursquare.com/v2/users/self/lists',
+        params: {
             oauth_token: places.OAUTH_TOKEN,
             v: places.FOURSQUARE_API_VERSION,
-            group: "created"
-        },
-        success: function (data, status, xhr) {
-            var list_id;
-            $.each(data.response.lists.items, function (i, v) {
-                var option = $("<option>");
-                option.html(v.name);
-                option.data("list_id", v.id);
-                option.data("num_list_items", v.listItems.count);
-                $("#lists").append(option);
-            });
-            RenderMap();
-        },
+            group: 'created'
+        }
+    }).
+    success(function (data) {
+        $scope.lists = data.response.lists.items;
+        $scope.active_list = $scope.lists[0];
+        // TODO: Render map.
+    }).
+    error(function (data) {
+        console.log('error', data);
     });
 
-    $("#lists").change(function() {
-        RenderMap();
-    });
+    $scope.updateMap = function () {
+        $http({
+            method: 'GET',
+            url: 'https://api.foursquare.com/v2/lists/' + $scope.active_list.id,
+            params: {
+                oauth_token: places.OAUTH_TOKEN,
+                v: places.FOURSQUARE_API_VERSION,
+                limit: 100,
+                sort: 'nearby'
+                // TODO: Add bounds.
+            }
+        }).
+        success(function (data) {
+            $scope.venues = [];
+            angular.forEach(data.response.list.listItems.items, function (v, k) {
+                var venue = v.venue;
+                angular.forEach(venue.categories, function (c, _) {
+                    if (c.primary === true) {
+                        venue._places_primary_category = c;
+                    }
+                });
+                $scope.venues.push(venue);
+            });
+            console.log($scope.venues);
+        }).
+        error(function (data) {
+            console.log('error', error);
+        });
+    };
 });
+
+function loadMapScript() {
+    var script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = 'https://maps.googleapis.com/maps/api/js?' +
+        'key=AIzaSyBkaFywaF2xqKiowMc-5DWVOdEFJzREygU&sensor=false&' +
+        'callback=InitializeMap';
+    document.body.appendChild(script);
+}
+
+window.onload = loadMapScript;
