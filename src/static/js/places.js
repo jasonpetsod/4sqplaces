@@ -82,4 +82,10 @@ places_app.controller('PlacesController', function ($scope, $http) {
         var bounds = $scope.map.controller.getGMap().getBounds();
         return bounds.contains(venue.location.latlng);
     };
+
+    $scope.distanceToCenter = function (venue) {
+        var center = $scope.map.controller.getGMap().getBounds().getCenter();
+        return google.maps.geometry.spherical.computeDistanceBetween(
+                center, venue.location.latlng);
+    };
 });

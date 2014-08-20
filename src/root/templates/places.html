@@ -1,6 +1,6 @@
 {{define "head"}}
 <link rel="stylesheet" href="/static/css/places.css" />
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBkaFywaF2xqKiowMc-5DWVOdEFJzREygU&sensor=false"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBkaFywaF2xqKiowMc-5DWVOdEFJzREygU&sensor=false&libraries=geometry"></script>
 <script src="/static/js/angular.js"></script>
 <script src="/static/js/lodash.min.js"></script>
 <script src="/static/js/angular-google-maps.min.js"></script>
@@ -31,7 +31,7 @@ places.OAUTH_TOKEN = "{{.OAuthToken}}";
 </div> <!-- #controls -->
 
 <div id="venues-list">
-<li ng-repeat="venue in venues | filter:visibleVenues">
+<li ng-repeat="venue in venues | filter:visibleVenues | orderBy:distanceToCenter">
 <h1>[[venue.name]]</h1>
 <div>[[venue.location.address]] ([[venue.location.crossStreet]])</div>
 <div>[[venue._places_primary_category.name]]</div>
