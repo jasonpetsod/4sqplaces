@@ -1,16 +1,25 @@
 {{define "head"}}
 <link rel="stylesheet" href="/static/css/places.css" />
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBkaFywaF2xqKiowMc-5DWVOdEFJzREygU&sensor=false"></script>
 <script src="/static/js/angular.js"></script>
+<script src="/static/js/lodash.min.js"></script>
+<script src="/static/js/angular-google-maps.min.js"></script>
 <script src="/static/js/places.js"></script>
 <script>
 places.OAUTH_TOKEN = "{{.OAuthToken}}";
 </script>
 {{end}}
 {{define "content"}}
-<div id="map-canvas"></div>
+<div ng-app="places_app" ng-controller="PlacesController" style="height: 100%;">
+<div id="map">
+<google-map center="map.center" zoom="map.zoom" draggable="true">
+<marker ng-repeat="venue in venues"
+        idKey="venue.id"
+        coords="venue.location"></marker>
+</google-map>
+</div>
 
-<div ng-app="places_app">
-<div id="sidebar" ng-controller="PlacesController">
+<div id="sidebar">
 
 <div id="controls">
 <select ng-model="active_list"
@@ -28,5 +37,5 @@ places.OAUTH_TOKEN = "{{.OAuthToken}}";
 
 </div> <!-- #sidebar -->
 
-</div> <!-- ng-app="places" -->
+</div> <!-- ng-app ng-controller -->
 {{end}}

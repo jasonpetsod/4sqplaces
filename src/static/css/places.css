@@ -10,10 +10,20 @@ body {
     padding: 0;
 }
 
-#map-canvas {
+#map {
     height: 100%;
     width: 65%;
     float: left;
+}
+
+.angular-google-map-container {
+    position: absolute;
+    height: 100%;
+    width: 65%;
+}
+
+google-map {
+    height: 100%;
 }
 
 #sidebar {
