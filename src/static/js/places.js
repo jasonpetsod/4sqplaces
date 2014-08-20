@@ -36,7 +36,8 @@ places_app.controller('PlacesController', function ($scope, $http) {
             latitude: 40.730885,
             longitude: -73.997383
         },
-        zoom: 15
+        zoom: 15,
+        controller: {}
     }
 
     $scope.updateMap = function () {
@@ -66,6 +67,8 @@ places_app.controller('PlacesController', function ($scope, $http) {
                     });
                     venue.location.latitude = venue.location.lat;
                     venue.location.longitude = venue.location.lng;
+                    venue.location.latlng = new google.maps.LatLng(
+                        venue.location.lat, venue.location.lng);
                     $scope.venues.push(venue);
                 });
             }).
@@ -73,5 +76,10 @@ places_app.controller('PlacesController', function ($scope, $http) {
                 console.log('error', data);
             });
         }
+    };
+
+    $scope.visibleVenues = function (venue) {
+        var bounds = $scope.map.controller.getGMap().getBounds();
+        return bounds.contains(venue.location.latlng);
     };
 });

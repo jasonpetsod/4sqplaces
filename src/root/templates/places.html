@@ -12,7 +12,10 @@ places.OAUTH_TOKEN = "{{.OAuthToken}}";
 {{define "content"}}
 <div ng-app="places_app" ng-controller="PlacesController" style="height: 100%;">
 <div id="map">
-<google-map center="map.center" zoom="map.zoom" draggable="true">
+<google-map center="map.center"
+            zoom="map.zoom"
+            control="map.controller"
+            draggable="true">
 <marker ng-repeat="venue in venues"
         idKey="venue.id"
         coords="venue.location"></marker>
@@ -28,7 +31,7 @@ places.OAUTH_TOKEN = "{{.OAuthToken}}";
 </div> <!-- #controls -->
 
 <div id="venues-list">
-<li ng-repeat="venue in venues">
+<li ng-repeat="venue in venues | filter:visibleVenues">
 <h1>[[venue.name]]</h1>
 <div>[[venue.location.address]] ([[venue.location.crossStreet]])</div>
 <div>[[venue._places_primary_category.name]]</div>
