@@ -25,7 +25,7 @@ places_app.controller('PlacesController', function ($scope, $http) {
     success(function (data) {
         $scope.lists = data.response.lists.items;
         $scope.active_list = $scope.lists[0];
-        // TODO: Render map.
+        $scope.updateMap();
     }).
     error(function (data) {
         console.log('error', data);
@@ -45,7 +45,6 @@ places_app.controller('PlacesController', function ($scope, $http) {
         for (var offset = 0;
              offset < $scope.active_list.listItems.count;
              offset += places.LIST_PAGINATION_LIMIT) {
-            console.log('offset', offset);
             $http({
                 method: 'GET',
                 url: 'https://api.foursquare.com/v2/lists/' + $scope.active_list.id,
