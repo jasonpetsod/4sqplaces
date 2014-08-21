@@ -8,58 +8,61 @@ body {
     height: 100%;
     margin: 0;
     padding: 0;
+    position: relative;
+}
+
+#container {
+    height: 100%;
+    min-height: 100%;
+    width: 100%;
+    position: relative;
 }
 
 #controls {
     width: 100%;
+    height: 60px;
 }
 
 #map {
-    height: 100%;
+    /* TODO: make the map span the rest of the vertical space */
+    height: 90%;
     width: 65%;
     float: left;
+    position: relative;
 }
 
 .angular-google-map-container {
     position: absolute;
     height: 100%;
-    width: 65%;
+    width: 100%;
+    top: 0;
 }
 
-google-map {
-    height: 100%;
-}
-
-#sidebar {
-    height: 100%;
+#venues {
+    height: 90%;
     width: 35%;
     float: left;
-    overflow: hidden;
-}
-
-#venues-list {
-    height: 100%;
     overflow: scroll;
 }
 
-#venues-list ul {
+#venues ul {
     list-style-type: none;
     margin: 0;
     padding: 0;
 }
 
-#venues-list li {
+#venues li {
     display: block;
     padding: 1em;
     margin: 0;
     border-bottom: 1px solid #eee;
 }
 
-#venues-list li.selected {
+#venues li.selected {
     background-color: #ddd;
 }
 
-#venues-list h1 {
+#venues h1 {
     font-size: 10pt;
     margin: 0;
     padding: 0;
