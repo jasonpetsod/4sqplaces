@@ -34,7 +34,8 @@ places.OAUTH_TOKEN = "{{.OAuthToken}}";
 <div id="venues-list">
 <li ng-repeat="venue in venues | filter:visibleVenues | orderBy:distanceToCenter"
     ng-class="{selected: venue === selected_venue}"
-    ng-click="selectVenue(venue)">
+    ng-click="selectVenue(venue)"
+    id="[[venue.id]]">
 <h1>[[venue.name]]</h1>
 <div>[[venue.location.address]] ([[venue.location.crossStreet]])</div>
 <div>[[venue._places_primary_category.name]]</div>

@@ -12,7 +12,7 @@ var places_app = angular.module(
         }
 );
 
-places_app.controller('PlacesController', function ($scope, $http) {
+places_app.controller('PlacesController', function ($scope, $http, $location, $anchorScroll) {
     $http({
         method: 'GET',
         url: 'https://api.foursquare.com/v2/users/self/lists',
@@ -92,8 +92,9 @@ places_app.controller('PlacesController', function ($scope, $http) {
 
     $scope.selectMarker = function (venue) {
         $scope.selected_venue = venue;
-        console.log($scope.selected_venue);
+        $location.hash(venue.id);
         $scope.$apply();
+        $anchorScroll();
     };
 
     $scope.selectVenue = function (venue) {
