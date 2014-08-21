@@ -2,6 +2,7 @@ var places = {}
 
 places.FOURSQUARE_API_VERSION = "20131201";
 places.LIST_PAGINATION_LIMIT = 100;
+places.LISTS_API_URI = 'https://api.foursquare.com/v2/users/self/lists';
 
 var places_app = angular.module(
     'places_app',
@@ -12,24 +13,40 @@ var places_app = angular.module(
     }
 );
 
-places_app.controller('PlacesController', function ($scope, $http, $location, $anchorScroll) {
-    $http({
-        method: 'GET',
-        url: 'https://api.foursquare.com/v2/users/self/lists',
+places_app.factory('listsService', function ($http) {
+    var config = {
         params: {
             oauth_token: places.OAUTH_TOKEN,
             v: places.FOURSQUARE_API_VERSION,
             group: 'created'
         }
-    }).
-    success(function (data) {
-        $scope.lists = data.response.lists.items;
-        $scope.active_list = $scope.lists[0];
-        $scope.updateMap();
-    }).
-    error(function (data) {
-        console.log('error', data);
-    });
+    };
+
+    var success = function (data) {
+        return data.data.response.lists.items;
+    };
+
+    var error = function (data) {
+        return data;
+    }
+
+    return {
+        getLists: function() {
+            return $http.get(places.LISTS_API_URI, config).then(success, error);
+        }
+    };
+});
+
+places_app.controller('PlacesController', function ($scope, $http, $location, $anchorScroll, listsService) {
+    listsService.getLists().then(
+        function (data) {
+            $scope.lists = data;
+            $scope.active_list = $scope.lists[0];
+            $scope.updateMap();
+        },
+        function (data) {
+            console.log('error', data);
+        });
 
     $scope.map = {
         center: {
