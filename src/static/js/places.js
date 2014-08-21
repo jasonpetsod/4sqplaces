@@ -4,12 +4,12 @@ places.FOURSQUARE_API_VERSION = "20131201";
 places.LIST_PAGINATION_LIMIT = 100;
 
 var places_app = angular.module(
-        'places_app',
-        ['google-maps'],
-        function ($interpolateProvider) {
-            $interpolateProvider.startSymbol('[[');
-            $interpolateProvider.endSymbol(']]');
-        }
+    'places_app',
+    ['google-maps'],
+    function ($interpolateProvider) {
+        $interpolateProvider.startSymbol('[[');
+        $interpolateProvider.endSymbol(']]');
+    }
 );
 
 places_app.controller('PlacesController', function ($scope, $http, $location, $anchorScroll) {
