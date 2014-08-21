@@ -10,6 +10,10 @@ body {
     padding: 0;
 }
 
+#controls {
+    width: 100%;
+}
+
 #map {
     height: 100%;
     width: 65%;

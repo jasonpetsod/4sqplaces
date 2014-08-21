@@ -11,6 +11,12 @@ places.OAUTH_TOKEN = "{{.OAuthToken}}";
 {{end}}
 {{define "content"}}
 <div ng-app="places_app" ng-controller="PlacesController" style="height: 100%;">
+<div id="controls">
+<select ng-model="active_list"
+        ng-options="list.name for list in lists"
+        ng-change="updateMap()"></select>
+</div> <!-- #controls -->
+
 <div id="map">
 <google-map center="map.center"
             zoom="map.zoom"
@@ -24,12 +30,6 @@ places.OAUTH_TOKEN = "{{.OAuthToken}}";
 </div>
 
 <div id="sidebar">
-
-<div id="controls">
-<select ng-model="active_list"
-        ng-options="list.name for list in lists"
-        ng-change="updateMap()"></select>
-</div> <!-- #controls -->
 
 <div id="venues-list">
 <li ng-repeat="venue in venues | filter:visibleVenues | orderBy:distanceToCenter"
