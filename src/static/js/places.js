@@ -54,7 +54,6 @@ places_app.controller('PlacesController', function ($scope, $http) {
                     v: places.FOURSQUARE_API_VERSION,
                     limit: places.LIST_PAGINATION_LIMIT,
                     offset: offset,
-                    sort: 'nearby'
                 }
             }).
             success(function (data) {
@@ -87,5 +86,17 @@ places_app.controller('PlacesController', function ($scope, $http) {
         var center = $scope.map.controller.getGMap().getBounds().getCenter();
         return google.maps.geometry.spherical.computeDistanceBetween(
                 center, venue.location.latlng);
+    };
+
+    $scope.selected_venue = null;
+
+    $scope.selectMarker = function (venue) {
+        $scope.selected_venue = venue;
+        console.log($scope.selected_venue);
+        $scope.$apply();
+    };
+
+    $scope.selectVenue = function (venue) {
+        $scope.selected_venue = venue;
     };
 });
