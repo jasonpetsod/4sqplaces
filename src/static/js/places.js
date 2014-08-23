@@ -269,11 +269,30 @@ places_app.controller(
         if ($scope.category_filter == '') {
             return true;
         }
-        var categories = $scope.category_filter.split(',');
-        for (var i = 0; i < categories.length; i++) {
-            var re = new RegExp(categories[i], 'i');
-            if (venue._places_primary_category.name.match(re)) {
+        if (venue._places_primary_category === null) {
+            return false;
+        }
+        var filters = $scope.category_filter.split(',');
+        for (var i = 0; i < filters.length; i++) {
+            var filter = filters[i];
+
+            var category = self._categories_by_name[filter];
+            if (category === undefined) {
+                continue;
+            }
+
+            // Get valid categories for the filter.
+            var allowed_categories = self._children_of_category[category.id];
+            allowed_categories.push(category.id);
+
+            if (allowed_categories.indexOf(venue._places_primary_category.id) != -1) {
                 return true;
+            }
+
+            for (var j = 0; j < venue.categories; j++) {
+                if (allowed_categories.indexOf(venue.categories[j].id) != -1) {
+                    return true;
+                }
             }
         };
         return false;
