@@ -16,7 +16,9 @@ places.OAUTH_TOKEN = "{{.OAuthToken}}";
         ng-options="list.name for list in lists"
         ng-change="updateMap()"></select>
 
-<input type="text" ng-model="category_filter">
+<input type="text"
+       ng-model="category_filter"
+       ng-model-options="{updateOn: 'blur'}">
 </div> <!-- #controls -->
 
 <div id="map">
