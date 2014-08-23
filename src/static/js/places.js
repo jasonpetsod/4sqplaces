@@ -61,6 +61,10 @@ places_app.factory('venuesService', function ($http) {
                             venue._places_primary_category = c;
                         }
                     });
+                    if (!('_places_primary_category' in venue)) {
+                        console.warn('no primary category', venue);
+                        venue._places_primary_category = null;
+                    }
 
                     // 'longitude' and 'latitude' attrs are used by
                     // angular-google-maps.
@@ -99,21 +103,27 @@ places_app.factory('categoriesService', function ($http) {
      * Generate a map of category ID to all of the category's children's IDs.
      *
      * @param {Object} category Foursquare API Category object.
-     * @param {Object} ids Object to populate with category IDs. Mapping of
-     * string category ID to array of string category IDs of the key's
+     * @param {Object} all_ids Object to populate with mappings of category ID
+     * to category Object.
+     * @param {Object} names Object to ppulate with mappings of category name
+     * to category Object.
+     * @param {Object} child_ids Object to populate with category IDs. Mapping
+     * of string category ID to array of string category IDs of the key's
      * children. This function will add the child IDs of 'category' to 'ids'.
      */
-    var generateCategoryChildren = function (category, ids) {
-        ids[category.id] = [];
+    var generateCategoryChildren = function (category, all_ids, names, child_ids) {
+        all_ids[category.id] = category;
+        names[category.name] = category;
+        child_ids[category.id] = [];
         angular.forEach(category.categories, function (c, _) {
             // Add the IDs of the immediate children.
-            ids[category.id].push(c.id);
+            child_ids[category.id].push(c.id);
 
             // Have each child add their children's IDs.
-            generateCategoryChildren(c, ids);
+            generateCategoryChildren(c, all_ids, names, child_ids);
 
             // Add each child's children's IDs to us.
-            Array.prototype.push.apply(ids[category.id], ids[c.id]);
+            Array.prototype.push.apply(child_ids[category.id], child_ids[c.id]);
         });
     };
 
@@ -131,10 +141,15 @@ places_app.factory('categoriesService', function ($http) {
                 var categories_by_id = {};
                 var categories_by_name = {};
                 angular.forEach(categories, function (category, _) {
-                    generateCategoryChildren(category, children_of_category);
-                    categories_by_id[category.id] = category;
-                    categories_by_name[category.name] = category;
+                    generateCategoryChildren(category,
+                                             categories_by_id,
+                                             categories_by_name,
+                                             children_of_category);
                 })
+
+                // TODO: Add custom filtering of category hierarchy (e.g.
+                // remove "Coffee Shop" from food).
+
                 return {
                     categories_by_id: categories_by_id,
                     categories_by_name: categories_by_name,
@@ -158,6 +173,8 @@ places_app.controller(
     // =======================================================================
     // Object attributes
     // =======================================================================
+
+    var self = this;
 
     // Object mapping string category ID to category Object.
     this._categories_by_id = null;
@@ -185,9 +202,10 @@ places_app.controller(
 
     categoriesService.getCategories().then(
         function (data) {
-            this._categories_by_id = data.categories_by_id;
-            this._categories_by_name = data.categories_by_name;
-            this._children_of_category = data.children_of_category;
+            console.log(data);
+            self._categories_by_id = data.categories_by_id;
+            self._categories_by_name = data.categories_by_name;
+            self._children_of_category = data.children_of_category;
         },
         function (data) {
             console.log('error', data);
