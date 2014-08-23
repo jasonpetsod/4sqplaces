@@ -47,15 +47,29 @@ places_app.factory('venuesService', function ($http) {
                 angular.forEach(items, function (v, k) {
                     var venue = v.venue;
                     // TODO: Make a Venue class.
+
+                    if ('closed' in venue) {
+                        if (venue.closed) {
+                            return;
+                        }
+                    }
+
+                    // Determine the primary category.
                     angular.forEach(venue.categories, function (c, _) {
                         if (c.primary === true) {
                             venue._places_primary_category = c;
                         }
                     });
+
+                    // 'longitude' and 'latitude' attrs are used by
+                    // angular-google-maps.
                     venue.location.latitude = venue.location.lat;
                     venue.location.longitude = venue.location.lng;
+
+                    // 'latlng' is used by $scope.distanceToCenter
                     venue.location.latlng = new google.maps.LatLng(
                         venue.location.lat, venue.location.lng);
+
                     venues.push(venue);
                 });
                 return venues;
