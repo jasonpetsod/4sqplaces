@@ -15,6 +15,8 @@ places.OAUTH_TOKEN = "{{.OAuthToken}}";
 <select ng-model="active_list"
         ng-options="list.name for list in lists"
         ng-change="updateMap()"></select>
+
+<input type="text" ng-model="category_filter">
 </div> <!-- #controls -->
 
 <div id="map">
@@ -22,7 +24,7 @@ places.OAUTH_TOKEN = "{{.OAuthToken}}";
             zoom="map.zoom"
             control="map.controller"
             draggable="true">
-<marker ng-repeat="venue in venues"
+<marker ng-repeat="venue in venues | filter:categoryFilter"
         idKey="venue.id"
         coords="venue.location"
         click="selectMarker(venue)"></marker>
@@ -30,7 +32,7 @@ places.OAUTH_TOKEN = "{{.OAuthToken}}";
 </div>
 
 <div id="venues">
-<li ng-repeat="venue in venues | filter:visibleVenues | orderBy:distanceToCenter"
+<li ng-repeat="venue in venues | filter:visibleVenues | filter:categoryFilter | orderBy:distanceToCenter"
     ng-class="{selected: venue === selected_venue}"
     ng-click="selectVenue(venue)"
     id="[[venue.id]]">

@@ -20,7 +20,8 @@ body {
 
 #controls {
     width: 100%;
-    height: 60px;
+    height: 2em;
+    padding: 1em;
 }
 
 #map {
@@ -66,4 +67,8 @@ body {
     font-size: 10pt;
     margin: 0;
     padding: 0;
+}
+
+input[type=text] {
+    width: 20em;
 }

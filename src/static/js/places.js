@@ -2,6 +2,7 @@ var places = {}
 
 places.FOURSQUARE_API_VERSION = "20131201";
 places.LIST_PAGINATION_LIMIT = 100;
+places.CATEGORIES_API_URI = 'https://api.foursquare.com/v2/venues/categories';
 places.LISTS_API_URI = 'https://api.foursquare.com/v2/users/self/lists';
 places.VENUES_API_URI = 'https://api.foursquare.com/v2/lists/';
 
@@ -92,7 +93,86 @@ places_app.factory('venuesService', function ($http) {
     };
 });
 
-places_app.controller('PlacesController', function ($scope, $location, $anchorScroll, listsService, venuesService) {
+places_app.factory('categoriesService', function ($http) {
+    // TODO: OMG THIS NEEDS TESTS
+    /**
+     * Generate a map of category ID to all of the category's children's IDs.
+     *
+     * @param {Object} category Foursquare API Category object.
+     * @param {Object} ids Object to populate with category IDs. Mapping of
+     * string category ID to array of string category IDs of the key's
+     * children. This function will add the child IDs of 'category' to 'ids'.
+     */
+    var generateCategoryChildren = function (category, ids) {
+        ids[category.id] = [];
+        angular.forEach(category.categories, function (c, _) {
+            // Add the IDs of the immediate children.
+            ids[category.id].push(c.id);
+
+            // Have each child add their children's IDs.
+            generateCategoryChildren(c, ids);
+
+            // Add each child's children's IDs to us.
+            Array.prototype.push.apply(ids[category.id], ids[c.id]);
+        });
+    };
+
+    return {
+        getCategories: function () {
+            var config = {
+                params: {
+                    oauth_token: places.OAUTH_TOKEN,
+                    v: places.FOURSQUARE_API_VERSION,
+                }
+            };
+            var success = function (data) {
+                var categories = data.data.response.categories;
+                var children_of_category = {};
+                var categories_by_id = {};
+                var categories_by_name = {};
+                angular.forEach(categories, function (category, _) {
+                    generateCategoryChildren(category, children_of_category);
+                    categories_by_id[category.id] = category;
+                    categories_by_name[category.name] = category;
+                })
+                return {
+                    categories_by_id: categories_by_id,
+                    categories_by_name: categories_by_name,
+                    children_of_category: children_of_category
+                };
+            };
+            var error = function (data) {
+                return data;
+            };
+            return $http.get(places.CATEGORIES_API_URI, config).then(
+                success, error);
+        }
+    };
+});
+
+places_app.controller(
+        'PlacesController',
+        function ($scope, $location, $anchorScroll, listsService,
+                  venuesService, categoriesService) {
+
+    // =======================================================================
+    // Object attributes
+    // =======================================================================
+
+    // Object mapping string category ID to category Object.
+    this._categories_by_id = null;
+
+    // Object mapping string category name to category Object.
+    this._categories_by_name = null;
+
+    // Object mapping category ID to array of category IDs of all of the key's
+    // descendants.
+    this._children_of_category = null;
+
+    // =======================================================================
+    // Initialization
+    // =======================================================================
+
     listsService.getLists().then(
         function (data) {
             $scope.lists = data;
@@ -102,6 +182,20 @@ places_app.controller('PlacesController', function ($scope, $location, $anchorSc
         function (data) {
             console.log('error', data);
         });
+
+    categoriesService.getCategories().then(
+        function (data) {
+            this._categories_by_id = data.categories_by_id;
+            this._categories_by_name = data.categories_by_name;
+            this._children_of_category = data.children_of_category;
+        },
+        function (data) {
+            console.log('error', data);
+        });
+
+    // =======================================================================
+    // Scope
+    // =======================================================================
 
     $scope.map = {
         center: {
@@ -150,5 +244,20 @@ places_app.controller('PlacesController', function ($scope, $location, $anchorSc
 
     $scope.selectVenue = function (venue) {
         $scope.selected_venue = venue;
+    };
+
+    $scope.category_filter = ''
+    $scope.categoryFilter = function(venue) {
+        if ($scope.category_filter == '') {
+            return true;
+        }
+        var categories = $scope.category_filter.split(',');
+        for (var i = 0; i < categories.length; i++) {
+            var re = new RegExp(categories[i], 'i');
+            if (venue._places_primary_category.name.match(re)) {
+                return true;
+            }
+        };
+        return false;
     };
 });
